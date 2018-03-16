@@ -7,7 +7,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/golang-migrate/migrate/source"
+	"github.com/graux/migrate/source"
 )
 
 // Test runs tests against source implementations.

@@ -13,9 +13,9 @@ cd examples/migrations && go-bindata -pkg migrations .
 
 ```go
 import (
-  "github.com/golang-migrate/migrate"
-  "github.com/golang-migrate/migrate/source/go-bindata"
-  "github.com/golang-migrate/migrate/source/go-bindata/examples/migrations"
+  "github.com/graux/migrate"
+  "github.com/graux/migrate/source/go-bindata"
+  "github.com/graux/migrate/source/go-bindata/examples/migrations"
 )
 
 func main() {

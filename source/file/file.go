@@ -9,7 +9,7 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/golang-migrate/migrate/source"
+	"github.com/graux/migrate/source"
 )
 
 func init() {

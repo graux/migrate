@@ -3,8 +3,8 @@ package cassandra
 import (
 	"fmt"
 	"testing"
-	dt "github.com/golang-migrate/migrate/database/testing"
-	mt "github.com/golang-migrate/migrate/testing"
+	dt "github.com/graux/migrate/database/testing"
+	mt "github.com/graux/migrate/testing"
 	"github.com/gocql/gocql"
 	"time"
 	"strconv"

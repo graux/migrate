@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/golang-migrate/migrate"
+	"github.com/graux/migrate"
 )
 
 // set main log
@@ -37,6 +37,7 @@ Options:
   -database        Run migrations against this database (driver://url)
   -prefetch N      Number of migrations to load in advance before executing (default 10)
   -lock-timeout N  Allow N seconds to acquire database lock (default 15)
+  -schema <name>   Name of the schema for the migrations table
   -verbose         Print verbose logging
   -version         Print version
   -help            Print usage

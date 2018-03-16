@@ -1,8 +1,8 @@
-[![Build Status](https://img.shields.io/travis/golang-migrate/migrate/master.svg)](https://travis-ci.org/golang-migrate/migrate)
-[![GoDoc](https://godoc.org/github.com/golang-migrate/migrate?status.svg)](https://godoc.org/github.com/golang-migrate/migrate)
-[![Coverage Status](https://img.shields.io/coveralls/github/golang-migrate/migrate/master.svg)](https://coveralls.io/github/golang-migrate/migrate?branch=master)
-[![packagecloud.io](https://img.shields.io/badge/deb-packagecloud.io-844fec.svg)](https://packagecloud.io/golang-migrate/migrate?filter=debs)
-[![GitHub Release](https://img.shields.io/github/release/golang-migrate/migrate.svg)](https://github.com/golang-migrate/migrate/releases)
+[![Build Status](https://img.shields.io/travis/graux/migrate/master.svg)](https://travis-ci.org/graux/migrate)
+[![GoDoc](https://godoc.org/github.com/graux/migrate?status.svg)](https://godoc.org/github.com/graux/migrate)
+[![Coverage Status](https://img.shields.io/coveralls/github/graux/migrate/master.svg)](https://coveralls.io/github/graux/migrate?branch=master)
+[![packagecloud.io](https://img.shields.io/badge/deb-packagecloud.io-844fec.svg)](https://packagecloud.io/graux/migrate?filter=debs)
+[![GitHub Release](https://img.shields.io/github/release/graux/migrate.svg)](https://github.com/graux/migrate/releases)
 
 
 # migrate
@@ -16,7 +16,7 @@ __Database migrations written in Go. Use as [CLI](#cli-usage) or import as [libr
  * Database drivers don't assume things or try to correct user input. When in doubt, fail.
 
 
-Looking for [v1](https://github.com/golang-migrate/migrate/tree/v1)?
+Looking for [v1](https://github.com/graux/migrate/tree/v1)?
 
 
 ## Databases
@@ -71,19 +71,19 @@ $ migrate -database postgres://localhost:5432/database up 2
  * API is stable and frozen for this release (v3.x).
  * Package migrate has no external dependencies.
  * Only import the drivers you need.
-   (check [dependency_tree.txt](https://github.com/golang-migrate/migrate/releases) for each driver)
+   (check [dependency_tree.txt](https://github.com/graux/migrate/releases) for each driver)
  * To help prevent database corruptions, it supports graceful stops via `GracefulStop chan bool`.
  * Bring your own logger.
  * Uses `io.Reader` streams internally for low memory overhead.
  * Thread-safe and no goroutine leaks.
 
-__[Go Documentation](https://godoc.org/github.com/golang-migrate/migrate)__
+__[Go Documentation](https://godoc.org/github.com/graux/migrate)__
 
 ```go
 import (
-    "github.com/golang-migrate/migrate"
-    _ "github.com/golang-migrate/migrate/database/postgres"
-    _ "github.com/golang-migrate/migrate/source/github"
+    "github.com/graux/migrate"
+    _ "github.com/graux/migrate/database/postgres"
+    _ "github.com/graux/migrate/source/github"
 )
 
 func main() {
@@ -100,9 +100,9 @@ Want to use an existing database client?
 import (
     "database/sql"
     _ "github.com/lib/pq"
-    "github.com/golang-migrate/migrate"
-    "github.com/golang-migrate/migrate/database/postgres"
-    _ "github.com/golang-migrate/migrate/source/file"
+    "github.com/graux/migrate"
+    "github.com/graux/migrate/database/postgres"
+    _ "github.com/graux/migrate/source/file"
 )
 
 func main() {

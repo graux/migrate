@@ -12,7 +12,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/github"
-	"github.com/golang-migrate/migrate/source"
+	"github.com/graux/migrate/source"
 )
 
 func init() {

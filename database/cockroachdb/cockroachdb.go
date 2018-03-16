@@ -9,8 +9,8 @@ import (
 
 	"github.com/cockroachdb/cockroach-go/crdb"
 	"github.com/lib/pq"
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database"
+	"github.com/graux/migrate"
+	"github.com/graux/migrate/database"
 	"regexp"
 	"strconv"
 	"context"

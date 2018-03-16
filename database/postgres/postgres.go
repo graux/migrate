@@ -10,9 +10,11 @@ import (
 	nurl "net/url"
 
 	"context"
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database"
+	"github.com/graux/migrate"
+	"github.com/graux/migrate/database"
 	"github.com/lib/pq"
+	"strings"
+	"regexp"
 )
 
 func init() {
@@ -31,8 +33,9 @@ var (
 )
 
 type Config struct {
-	MigrationsTable string
-	DatabaseName    string
+	MigrationsTable  string
+	DatabaseName     string
+	MigrationsSchema string
 }
 
 type Postgres struct {
@@ -103,9 +106,19 @@ func (p *Postgres) Open(url string) (database.Driver, error) {
 		migrationsTable = DefaultMigrationsTable
 	}
 
+	migrationsSchema := "public"
+	if strings.Contains(url, "search_path=") {
+		re := regexp.MustCompile("search_path=(.*?)($|&)")
+		match := re.FindStringSubmatch(url)
+		if len(match) >= 2 {
+			migrationsSchema = strings.Split(match[1], ",")[0]
+		}
+	}
+
 	px, err := WithInstance(db, &Config{
-		DatabaseName:    purl.Path,
-		MigrationsTable: migrationsTable,
+		DatabaseName:     purl.Path,
+		MigrationsTable:  migrationsTable,
+		MigrationsSchema: migrationsSchema,
 	})
 	if err != nil {
 		return nil, err
@@ -185,14 +198,14 @@ func (p *Postgres) SetVersion(version int, dirty bool) error {
 		return &database.Error{OrigErr: err, Err: "transaction start failed"}
 	}
 
-	query := `TRUNCATE "` + p.config.MigrationsTable + `"`
+	query := `TRUNCATE ` + p.config.MigrationsSchema + `."` + p.config.MigrationsTable + `"`
 	if _, err := tx.Exec(query); err != nil {
 		tx.Rollback()
 		return &database.Error{OrigErr: err, Query: []byte(query)}
 	}
 
 	if version >= 0 {
-		query = `INSERT INTO "` + p.config.MigrationsTable + `" (version, dirty) VALUES ($1, $2)`
+		query = `INSERT INTO ` + p.config.MigrationsSchema + `."` + p.config.MigrationsTable + `" (version, dirty) VALUES ($1, $2)`
 		if _, err := tx.Exec(query, version, dirty); err != nil {
 			tx.Rollback()
 			return &database.Error{OrigErr: err, Query: []byte(query)}
@@ -207,7 +220,7 @@ func (p *Postgres) SetVersion(version int, dirty bool) error {
 }
 
 func (p *Postgres) Version() (version int, dirty bool, err error) {
-	query := `SELECT version, dirty FROM "` + p.config.MigrationsTable + `" LIMIT 1`
+	query := `SELECT version, dirty FROM ` + p.config.MigrationsSchema + `."` + p.config.MigrationsTable + `" LIMIT 1`
 	err = p.conn.QueryRowContext(context.Background(), query).Scan(&version, &dirty)
 	switch {
 	case err == sql.ErrNoRows:
@@ -266,16 +279,28 @@ func (p *Postgres) Drop() error {
 func (p *Postgres) ensureVersionTable() error {
 	// check if migration table exists
 	var count int
-	query := `SELECT COUNT(1) FROM information_schema.tables WHERE table_name = $1 AND table_schema = (SELECT current_schema()) LIMIT 1`
-	if err := p.conn.QueryRowContext(context.Background(), query, p.config.MigrationsTable).Scan(&count); err != nil {
+	query := `SELECT COUNT(1) FROM information_schema.tables WHERE table_name = $1 AND table_schema = $2 LIMIT 1`
+	if err := p.conn.QueryRowContext(context.Background(), query, p.config.MigrationsTable, p.config.MigrationsSchema).Scan(&count); err != nil {
 		return &database.Error{OrigErr: err, Query: []byte(query)}
 	}
 	if count == 1 {
 		return nil
 	}
 
+	// check if schema exists
+	query = `SELECT COUNT(1) FROM information_schema.schemata WHERE schema_name = $1 LIMIT 1`
+	if err := p.conn.QueryRowContext(context.Background(), query, p.config.MigrationsSchema).Scan(&count); err != nil {
+		return &database.Error{OrigErr: err, Query: []byte(query)}
+	}
+	if count < 1 {
+		query = fmt.Sprintf("CREATE SCHEMA IF NOT EXISTS %s", p.config.MigrationsSchema)
+		if _, err := p.conn.ExecContext(context.Background(), query); err != nil {
+			return &database.Error{OrigErr: err, Query: []byte(query)}
+		}
+	}
+
 	// if not, create the empty migration table
-	query = `CREATE TABLE "` + p.config.MigrationsTable + `" (version bigint not null primary key, dirty boolean not null)`
+	query = `CREATE TABLE ` + p.config.MigrationsSchema + `."` + p.config.MigrationsTable + `" (version bigint not null primary key, dirty boolean not null)`
 	if _, err := p.conn.ExecContext(context.Background(), query); err != nil {
 		return &database.Error{OrigErr: err, Query: []byte(query)}
 	}
