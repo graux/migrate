@@ -13,8 +13,8 @@ import (
 	"github.com/graux/migrate"
 	"github.com/graux/migrate/database"
 	"github.com/lib/pq"
-	"strings"
 	"regexp"
+	"strings"
 )
 
 func init() {
@@ -184,9 +184,17 @@ func (p *Postgres) Run(migration io.Reader) error {
 
 	// run migration
 	query := string(migr[:])
-	if _, err := p.conn.ExecContext(context.Background(), query); err != nil {
-		// TODO: cast to postgress error and get line number
-		return database.Error{OrigErr: err, Err: "migration failed", Query: migr}
+	queries := []string{query}
+
+	if strings.HasPrefix(query, "-- migrate: no-transaction") {
+		queries = strings.Split(query, ";")
+	}
+
+	for _, query = range queries {
+		if _, err := p.conn.ExecContext(context.Background(), query); err != nil {
+			// TODO: cast to postgress error and get line number
+			return database.Error{OrigErr: err, Err: "migration failed", Query: migr}
+		}
 	}
 
 	return nil
